@@ -93,7 +93,24 @@ public class TTSWebSocket {
     }
 
     public void send(String originText) {
-        this.init();
+        send(originText, false);
+    }
+
+    public void send(String originText, boolean continuous) {
+        if(!continuous) {
+            //todo 存在并发问题
+            this.init();
+        }
+
+        //等待上句合成完毕
+        while (this.isSynthesizing()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                log.error("等待合成语音流异常", ex);
+            }
+        }
+
         String text = Tool.fixTrim(originText);
         // 替换一些会导致不返回数据的特殊字符\p{N}
         /**

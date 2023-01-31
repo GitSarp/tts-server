@@ -115,6 +115,7 @@ public class TTSWebSocketListener extends WebSocketListener {
                 // 去除WAV文件的文件头，解决播放开头时的杂音
                 audioIndex += 44;
             }
+            //todo 并发问题
             client.writeBuffer(bytes.substring(audioIndex));
         }
     }
