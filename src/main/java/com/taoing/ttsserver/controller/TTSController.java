@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,7 +31,7 @@ public class TTSController {
      * @param param
      */
     @PostMapping(value = "/text2Speech")
-    public void text2Speech(HttpServletResponse response, TextTTSReq param) {
+    public void text2Speech(HttpServletResponse response, @RequestBody TextTTSReq param) {
         if (log.isDebugEnabled()) {
             log.debug("req: {}", param.toString());
         }
