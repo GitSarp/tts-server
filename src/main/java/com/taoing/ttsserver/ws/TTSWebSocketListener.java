@@ -1,5 +1,6 @@
 package com.taoing.ttsserver.ws;
 
+import com.taoing.ttsserver.server.WsBinder;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
 import okhttp3.WebSocket;
@@ -7,6 +8,7 @@ import okhttp3.WebSocketListener;
 import okio.ByteString;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 
@@ -95,6 +97,10 @@ public class TTSWebSocketListener extends WebSocketListener {
 
     @Override
     public void onMessage(@NotNull WebSocket webSocket, @NotNull ByteString bytes) {
+        //客户端是否绑定
+        boolean clientBounded = WsBinder.isBounded(client);
+
+
         if (log.isDebugEnabled()) {
             log.debug("recv:\n{}", bytes.utf8());
         }
@@ -115,6 +121,7 @@ public class TTSWebSocketListener extends WebSocketListener {
                 // 去除WAV文件的文件头，解决播放开头时的杂音
                 audioIndex += 44;
             }
+
             //todo 并发问题
             client.writeBuffer(bytes.substring(audioIndex));
         }

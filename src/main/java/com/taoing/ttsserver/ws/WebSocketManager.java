@@ -13,9 +13,9 @@ import java.util.Map;
  * websocket client 管理
  */
 @Slf4j
-@Component
 @Getter
 @Setter
+@Component
 public class WebSocketManager {
     /**
      * 可用websocket client识别编码, 最多3个
@@ -42,6 +42,7 @@ public class WebSocketManager {
         if (!isMatch) {
             return null;
         }
+
         TTSWebSocket webSocket = webSocketMap.get(code);
         if (webSocket == null || !webSocket.isAvailable()) {
             webSocket = new TTSWebSocket(code, ttsConfig);

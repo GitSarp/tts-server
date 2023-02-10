@@ -1,6 +1,9 @@
 package com.taoing.ttsserver.ws;
 
 import com.taoing.ttsserver.utils.Tool;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +16,7 @@ import okio.ByteString;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -134,16 +138,16 @@ public class TTSWebSocket {
 
     /**
      * 等待语音合成完成, 写入response
-     * @param response
+     * @param target
      */
-    public void writeAudioStream(HttpServletResponse response) {
+    public void writeAudioStream(Object target) {
         long startTime = System.currentTimeMillis();
         while (this.synthesizing) {
             try {
                 Thread.sleep(100);
                 long time = System.currentTimeMillis() - startTime;
-                if (time > 30 * 1000) {
-                    // 超时30s
+                if (time > 10 * 1000) {
+                    // 超时10s
                     this.synthesizing = false;
                 }
             } catch (InterruptedException ex) {
@@ -152,15 +156,24 @@ public class TTSWebSocket {
         }
 
         byte[] bytes = buffer.readByteArray();
-        if (bytes.length > 0) {
-            response.setHeader("Content-Type", this.mime);
-            try (OutputStream out = response.getOutputStream()) {
-                out.write(bytes, 0, bytes.length);
-            } catch (IOException ex) {
-                log.error("语音流转储响应流失败: {}", ex.getMessage());
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        //没有数据也返回，防止客户端一直等待导致连接空闲断开
+        //if (bytes.length > 0) {
+            //http
+            if(target instanceof HttpServletResponse) {
+                HttpServletResponse response = (HttpServletResponse) target;
+                response.setHeader("Content-Type", this.mime);
+                try (OutputStream out = response.getOutputStream()) {
+                    out.write(bytes, 0, bytes.length);
+                } catch (IOException ex) {
+                    log.error("语音流转储响应流失败: {}", ex.getMessage());
+                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                }
+            } else if(target instanceof ChannelHandlerContext){ //websocket
+                ChannelHandlerContext ctx = (ChannelHandlerContext) target;
+                BinaryWebSocketFrame frame = new BinaryWebSocketFrame(Unpooled.wrappedBuffer(bytes));
+                ctx.writeAndFlush(frame);
             }
-        }
+        //}
         // 释放资源
         this.buffer = null;
     }

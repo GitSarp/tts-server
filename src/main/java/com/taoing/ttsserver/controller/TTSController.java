@@ -42,8 +42,8 @@ public class TTSController {
         this.ttsService.synthesisAudio(response, param);
     }
 
-    @PostMapping(value = "/read")
-    public void read(HttpServletResponse response, @RequestBody ReadReq readReq) {
+    @PostMapping(value = "/readShort")
+    public void readShort(HttpServletResponse response, @RequestBody ReadReq readReq) {
         if (log.isDebugEnabled()) {
             log.debug("req: {}", readReq.toString());
         }
