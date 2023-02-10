@@ -146,8 +146,8 @@ public class TTSWebSocket {
             try {
                 Thread.sleep(100);
                 long time = System.currentTimeMillis() - startTime;
-                if (time > 10 * 1000) {
-                    // 超时10s
+                if (time > 60 * 1000) {
+                    // 超时60s
                     this.synthesizing = false;
                 }
             } catch (InterruptedException ex) {
